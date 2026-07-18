@@ -5,7 +5,7 @@ import numpy as np
 app = Flask(__name__)
 
 # Load model
-with open("naive_model(2).pkl", "rb") as file:
+with open("naive_model.pkl", "rb") as file:
     model = pickle.load(file)
 
 HTML = """

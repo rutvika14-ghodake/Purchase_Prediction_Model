@@ -4,14 +4,18 @@ import numpy as np
 
 app = Flask(__name__)
 
-# Load model
+# Load Model
 model = joblib.load("naive_model.pkl")
 
-HTML = """
+html = """
+
 <!DOCTYPE html>
 <html>
 <head>
-<title>Naive Bayes Prediction</title>
+
+<title>Naive Bayes Predictor</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 
@@ -19,43 +23,49 @@ HTML = """
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
+font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
 
-background:linear-gradient(135deg,#4A00E0,#8E2DE2);
-height:100vh;
+background:linear-gradient(135deg,#0f172a,#1e3a8a,#3b82f6);
 display:flex;
 justify-content:center;
 align-items:center;
+height:100vh;
 
 }
 
 .container{
 
 width:420px;
+background:white;
 padding:35px;
-background:rgba(255,255,255,0.12);
-backdrop-filter:blur(18px);
 border-radius:18px;
-box-shadow:0 15px 35px rgba(0,0,0,.3);
-text-align:center;
-color:white;
+box-shadow:0 15px 40px rgba(0,0,0,.3);
 
 }
 
 h1{
 
-margin-bottom:8px;
-font-size:30px;
+text-align:center;
+color:#1e3a8a;
+margin-bottom:10px;
 
 }
 
 p{
 
+text-align:center;
+color:gray;
 margin-bottom:25px;
-color:#e5e5e5;
+
+}
+
+label{
+
+font-weight:bold;
+color:#333;
 
 }
 
@@ -63,24 +73,30 @@ input{
 
 width:100%;
 padding:12px;
-margin:10px 0;
-border:none;
-outline:none;
+margin-top:8px;
+margin-bottom:18px;
+border:1px solid #ccc;
 border-radius:8px;
 font-size:16px;
+
+}
+
+input:focus{
+
+outline:none;
+border-color:#2563eb;
 
 }
 
 button{
 
 width:100%;
-padding:13px;
-margin-top:15px;
+padding:14px;
+background:#2563eb;
 border:none;
-border-radius:8px;
-background:#00C9A7;
 color:white;
 font-size:18px;
+border-radius:8px;
 cursor:pointer;
 transition:.3s;
 
@@ -88,27 +104,30 @@ transition:.3s;
 
 button:hover{
 
-background:#00A98B;
-transform:scale(1.03);
+background:#1d4ed8;
 
 }
 
 .result{
 
-margin-top:20px;
+margin-top:25px;
 padding:15px;
-border-radius:8px;
-background:rgba(255,255,255,.15);
+background:#eff6ff;
+border-left:6px solid #2563eb;
 font-size:22px;
+text-align:center;
+border-radius:8px;
 font-weight:bold;
+color:#1e3a8a;
 
 }
 
 .footer{
 
 margin-top:20px;
+text-align:center;
 font-size:13px;
-color:#ddd;
+color:gray;
 
 }
 
@@ -120,19 +139,20 @@ color:#ddd;
 
 <div class="container">
 
-<h1>Prediction App</h1>
+<h1>Naive Bayes Predictor</h1>
 
-<p>Naive Bayes Machine Learning Model</p>
+<p>Machine Learning Prediction App</p>
 
 <form method="POST">
 
-<input type="number" step="any" name="f1" placeholder="Feature 1" required>
+<label>Feature 1</label>
+<input type="number" step="any" name="feature1" required>
 
-<input type="number" step="any" name="f2" placeholder="Feature 2" required>
+<label>Feature 2</label>
+<input type="number" step="any" name="feature2" required>
 
-<input type="number" step="any" name="f3" placeholder="Feature 3" required>
-
-<input type="number" step="any" name="f4" placeholder="Feature 4" required>
+<label>Feature 3</label>
+<input type="number" step="any" name="feature3" required>
 
 <button type="submit">
 
@@ -142,11 +162,11 @@ Predict
 
 </form>
 
-{% if prediction %}
+{% if prediction != None %}
 
 <div class="result">
 
-Prediction : {{prediction}}
+Prediction : {{ prediction }}
 
 </div>
 
@@ -154,7 +174,7 @@ Prediction : {{prediction}}
 
 <div class="footer">
 
-Developed using Flask ❤️
+Made with Flask ❤️
 
 </div>
 
@@ -170,23 +190,20 @@ Developed using Flask ❤️
 
 def home():
 
-    prediction=None
+    prediction = None
 
-    if request.method=="POST":
+    if request.method == "POST":
 
-        features=[
+        f1 = float(request.form["feature1"])
+        f2 = float(request.form["feature2"])
+        f3 = float(request.form["feature3"])
 
-            float(request.form["f1"]),
-            float(request.form["f2"]),
-            float(request.form["f3"]),
-            float(request.form["f4"])
+        data = np.array([[f1,f2,f3]])
 
-        ]
+        prediction = model.predict(data)[0]
 
-        prediction=model.predict([features])[0]
+    return render_template_string(html,prediction=prediction)
 
-    return render_template_string(HTML,prediction=prediction)
 
-if __name__=="__main__":
-
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0",port=5000)
